@@ -20,7 +20,7 @@ import org.springframework.security.web.csrf.CsrfFilter;
 import java.security.SecureRandom;
 
 @Configuration
-@EnableWebSecurity(debug = true)
+@EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     
     @Autowired
@@ -48,7 +48,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/api/info").hasAuthority(Permissions.VIEW_INFO.getAuthority())
                 .antMatchers("/api/admin").hasAuthority(Permissions.VIEW_ADMIN.getAuthority())
-                .antMatchers("/api/about").permitAll()
+                .antMatchers("/api/about", "/login*", "/logout*").permitAll()
                 .and()
                 .httpBasic()
                 .and()

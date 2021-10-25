@@ -69,15 +69,18 @@ class Module2SecurityApplicationsApplicationTests {
     }
 
     @Test
-    public void testBruteForceLogins() {
-        assertThrows(BruteForceAttackSecurityException.class, () -> {
-                    for (int i = 0; i < 4; i++) {
-                        mockMvc.perform(get("/api/info")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .with(httpBasic(ADMIN_LOGIN, WRONG_PASSWORD))
-                                .with(differentRemoteHost()));
-                    }
-                }
+    public void testBruteForceLogins() throws Exception {
+        for (int i = 0; i < 3; i++) {
+            mockMvc.perform(get("/api/info")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .with(httpBasic(ADMIN_LOGIN, WRONG_PASSWORD))
+                    .with(differentRemoteHost()));
+        }
+
+        assertThrows(BruteForceAttackSecurityException.class, () -> mockMvc.perform(get("/api/info")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(httpBasic(ADMIN_LOGIN, WRONG_PASSWORD))
+                .with(differentRemoteHost()))
         );
     }
 
