@@ -11,7 +11,7 @@ public class HttpRequestUtils {
     }
     
     public static String extractSourceIp(HttpServletRequest request) {
-        final String header = request.getHeader(TARGET_REQUEST_HEADER);
+        final var header = request.getHeader(TARGET_REQUEST_HEADER);
         return header == null ? request.getRemoteAddr() : header.split(",")[0];
     }
 }

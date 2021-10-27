@@ -37,6 +37,12 @@ public class UserInitializer {
                         .password("noname_pass")
                         .passwordEncoder(passwordEncoder::encode)
                         .authorities(Collections.emptyList())
+                        .build(),
+                User.builder()
+                        .username("sec@gmail.com")
+                        .password("security")
+                        .passwordEncoder(passwordEncoder::encode)
+                        .authorities(Permissions.STANDARD.getAuthority())
                         .build()
         );
     }

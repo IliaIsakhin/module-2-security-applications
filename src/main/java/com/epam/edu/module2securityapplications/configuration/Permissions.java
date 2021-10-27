@@ -2,7 +2,8 @@ package com.epam.edu.module2securityapplications.configuration;
 
 public enum Permissions {
     VIEW_ADMIN("ROLE_VIEW_ADMIN"),
-    VIEW_INFO("ROLE_VIEW_INFO");
+    VIEW_INFO("ROLE_VIEW_INFO"),
+    STANDARD("ROLE_STANDARD");
 
     Permissions(String value) {
         this.authority = value;

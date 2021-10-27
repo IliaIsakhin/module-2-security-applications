@@ -14,10 +14,14 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -28,8 +32,13 @@ class Module2SecurityApplicationsApplicationTests {
 
     private static final String ADMIN_LOGIN = "admin@gmail.com";
     private static final String ADMIN_PASSWORD = "admin_pass";
+    
     private static final String USER_LOGIN = "user@gmail.com";
     private static final String USER_PASSWORD = "user_pass";
+    
+    private static final String SECRET_LOGIN = "sec@gmail.com";
+    private static final String SECRET_PASSWORD = "security";
+    
     private static final String WRONG_PASSWORD = "i`m lucky!";
 
     @Container
@@ -72,9 +81,10 @@ class Module2SecurityApplicationsApplicationTests {
     public void testBruteForceLogins() throws Exception {
         for (int i = 0; i < 3; i++) {
             mockMvc.perform(get("/api/info")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .with(httpBasic(ADMIN_LOGIN, WRONG_PASSWORD))
-                    .with(differentRemoteHost()));
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .with(httpBasic(ADMIN_LOGIN, WRONG_PASSWORD))
+                            .with(differentRemoteHost()))
+                    .andExpect(status().isUnauthorized());
         }
 
         assertThrows(BruteForceAttackSecurityException.class, () -> mockMvc.perform(get("/api/info")
@@ -82,6 +92,27 @@ class Module2SecurityApplicationsApplicationTests {
                 .with(httpBasic(ADMIN_LOGIN, WRONG_PASSWORD))
                 .with(differentRemoteHost()))
         );
+    }
+
+    @Test
+    public void testStoringSecretInformation() throws Exception {
+        var secret = "мама мыла раму";
+
+        var urlToProceed = mockMvc.perform(post("/api/secret")
+                        .contentType(MediaType.TEXT_PLAIN_VALUE)
+                        .content(secret)
+                        .with(httpBasic(SECRET_LOGIN, SECRET_PASSWORD)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        
+        var returnedSecret = mockMvc.perform(get(urlToProceed).with(httpBasic(SECRET_LOGIN, SECRET_PASSWORD)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        
+        assertEquals(secret, returnedSecret);
+
+        mockMvc.perform(get(urlToProceed).with(httpBasic(SECRET_LOGIN, SECRET_PASSWORD)))
+                .andExpect(status().isNotFound());
     }
 
     @DynamicPropertySource
